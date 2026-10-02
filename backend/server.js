@@ -14,3 +14,5 @@ app.use('/api/admin',require('./routes/adminRoutes'));
 app.get('*',(req,res)=>res.sendFile(path.join(__dirname,'../frontend/index.html')));
 const port=process.env.PORT||5000;
 connectDB().then(()=>app.listen(port,()=>console.log(`🚀 Server running at http://localhost:${port}`))).catch(e=>{console.error(e);process.exit(1);});
+
+module.exports = app;
