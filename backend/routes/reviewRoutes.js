@@ -1,0 +1,1 @@
+const r=require('express').Router(),c=require('../controllers/reviewController'),a=require('../middleware/auth');r.get('/book/:bookId',c.list);r.get('/book/:bookId/mine',a,c.mine);r.post('/book/:bookId',a,c.upsert);r.delete('/:id/book/:bookId',a,c.remove);module.exports=r;

@@ -1,0 +1,73 @@
+<!doctype html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width,initial-scale=1">
+	<title>Book Recommendation Shelf</title>
+	<link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+	<nav></nav>
+	<main class="container">
+		<section class="hero">
+			<h1>📚 Book Recommendation Shelf</h1>
+			<p>Read, track, review and organize your personal library.</p>
+			<a class="btn" href="/books.html">Browse Books</a>
+			<a class="btn" href="/register.html">Create Account</a>
+		</section>
+		<section aria-labelledby="explore-title">
+			<div class="home-section-heading">
+				<h2 id="explore-title">Explore Books</h2>
+				<a class="btn" href="/books.html">View All Books</a>
+			</div>
+			<div id="home-books" class="grid" aria-live="polite"></div>
+		</section>
+		<div class="grid" style="margin-top:20px">
+			<div class="card"><h3>Personal Shelf</h3><p>Want to Read, Reading and Completed books are stored per user.</p></div>
+			<div class="card"><h3>Automatic Progress</h3><p>Every book has exactly 20 pages. Reader page turns update progress automatically.</p></div>
+			<div class="card"><h3>Rule-Based Recommendations</h3><p>No AI or ML. Recommendations use your shelf and review history.</p></div>
+		</div>
+	</main>
+	<script src="/js/api.js"></script>
+	<script src="/js/nav.js"></script>
+	<script>
+		const homeBooks = document.getElementById('home-books');
+
+		function escapeHtml(value) {
+			return String(value ?? '').replace(/[&<>"']/g, character => ({
+				'&': '&amp;',
+				'<': '&lt;',
+				'>': '&gt;',
+				'"': '&quot;',
+				"'": '&#39;'
+			})[character]);
+		}
+
+		async function loadHomeBooks() {
+			try {
+				const books = await apiFetch('/books');
+				homeBooks.innerHTML = books.map(book => {
+					const rating = Math.max(0, Math.min(5, Number(book.averageRating) || 0));
+					const fullStars = Math.round(rating);
+					const stars = `<span class="rating-stars" aria-label="${rating} out of 5 stars"><span class="rating-stars-filled">${'★'.repeat(fullStars)}</span><span class="rating-stars-empty">${'☆'.repeat(5 - fullStars)}</span></span>`;
+					const cover = book.cover
+						? `<img class="book-card-cover" src="${escapeHtml(book.cover)}" alt="Cover of ${escapeHtml(book.title)}" loading="lazy">`
+						: `<div class="cover">${escapeHtml(book.title)}</div>`;
+					return `<article class="card">
+						${cover}
+						<h3>${escapeHtml(book.title)}</h3>
+						<p>${escapeHtml(book.author)}</p>
+						<p>${escapeHtml(book.genre)}</p>
+						<p>${stars} ${rating.toFixed(1)}/5</p>
+						<a class="btn" href="/book-details.html?id=${encodeURIComponent(book._id)}">View Details</a>
+					</article>`;
+				}).join('') || '<p>No books are available yet.</p>';
+			} catch (error) {
+				homeBooks.innerHTML = `<p class="error">${escapeHtml(error.message)}</p>`;
+			}
+		}
+
+		loadHomeBooks();
+	</script>
+</body>
+</html>

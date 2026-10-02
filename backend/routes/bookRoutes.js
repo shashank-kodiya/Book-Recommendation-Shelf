@@ -1,0 +1,1 @@
+const r=require('express').Router(),c=require('../controllers/bookController');r.get('/',c.list);r.get('/genres',c.genres);r.get('/:id',c.get);r.post('/',c.add);module.exports=r;

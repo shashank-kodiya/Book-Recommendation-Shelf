@@ -1,0 +1,1 @@
+const r=require('express').Router(),c=require('../controllers/dashboardController'),a=require('../middleware/auth');r.get('/',a,c.get);module.exports=r;

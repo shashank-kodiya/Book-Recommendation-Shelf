@@ -1,0 +1,1 @@
+const r=require('express').Router(),c=require('../controllers/shelfController'),a=require('../middleware/auth');r.use(a);r.get('/',c.list);r.get('/book/:bookId',c.one);r.post('/:bookId',c.add);r.put('/:id',c.update);r.delete('/:id',c.remove);module.exports=r;

@@ -1,0 +1,63 @@
+<!doctype html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width,initial-scale=1">
+	<title>Dashboard</title>
+	<link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+	<nav></nav>
+	<main class="container">
+		<h1>Dashboard</h1>
+		<div id="stats" class="stats"></div>
+		<h2>Your Highest-Rated Books</h2>
+		<div id="top" class="grid"></div>
+	</main>
+	<script src="/js/api.js"></script>
+	<script src="/js/nav.js"></script>
+	<script>
+		requireLogin();
+		const statsElement = document.getElementById('stats');
+		const topBooksElement = document.getElementById('top');
+
+		function escapeHtml(value) {
+			return String(value ?? '').replace(/[&<>"']/g, character => ({
+				'&': '&amp;',
+				'<': '&lt;',
+				'>': '&gt;',
+				'"': '&quot;',
+				"'": '&#39;'
+			})[character]);
+		}
+
+		async function loadDashboard() {
+			try {
+				const data = await apiFetch('/dashboard');
+				statsElement.innerHTML = Object.entries(data.counts).map(([label, count]) =>
+					`<div class="stat"><h2>${count}</h2><p>${escapeHtml(label)}</p></div>`
+				).join('');
+
+				topBooksElement.innerHTML = data.top.map(book => {
+					const rating = Math.max(0, Math.min(5, Number(book.averageRating) || 0));
+					const fullStars = Math.round(rating);
+					const stars = `<span class="rating-stars" aria-label="${rating} out of 5 stars"><span class="rating-stars-filled">${'★'.repeat(fullStars)}</span><span class="rating-stars-empty">${'☆'.repeat(5 - fullStars)}</span></span>`;
+					const reviews = book.reviews?.length
+						? book.reviews.map(review => `<blockquote><p>${escapeHtml(review.review || 'No written review.')}</p></blockquote>`).join('')
+						: '<p class="muted">No reviews yet.</p>';
+
+					return `<article class="card">
+						<h3>${escapeHtml(book.title)}</h3>
+						<p>${escapeHtml(book.genre)} · ${stars} ${rating}/5</p>
+						${reviews}
+					</article>`;
+				}).join('') || '<p>Books you review will appear here.</p>';
+			} catch (error) {
+				topBooksElement.innerHTML = `<p class="error">${escapeHtml(error.message)}</p>`;
+			}
+		}
+
+		loadDashboard();
+	</script>
+</body>
+</html>
